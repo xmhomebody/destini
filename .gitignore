@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code 本地配置（不提交到远端）
+.claude/
+_design-reference/
