@@ -100,7 +100,10 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full", "antialiased", cinzel.variable, playfair.variable, "font-sans", geist.variable)}
     >
-      <body className="parchment-bg min-h-full flex flex-col">{children}</body>
+      {/* body 透明：背景由页面的 fixed 图层接管，full viewport 铺满 */}
+      <body className="min-h-full flex flex-col bg-transparent">
+        {children}
+      </body>
     </html>
   );
 }

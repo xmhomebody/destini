@@ -283,7 +283,8 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    /* 不使用 @apply bg-background，避免覆盖 .parchment-bg 多层渐变 */
+    /* 背景由页面 fixed 图层全宽接管，body 本身保持透明 */
+    background-color: transparent;
     color: var(--foreground);
   }
   html {
