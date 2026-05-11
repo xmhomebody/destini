@@ -113,10 +113,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn("h-full", "antialiased", cinzel.variable, playfair.variable, "font-sans", geist.variable)}
     >
       {/* body 透明：背景由页面的 fixed 图层接管，full viewport 铺满 */}
-      <body className="min-h-full flex flex-col bg-transparent">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-transparent">
         {children}
       </body>
     </html>
