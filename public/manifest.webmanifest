@@ -1,0 +1,31 @@
+{
+  "name": "Destini — Ancient Insight, Ritual Guidance, Inner Healing",
+  "short_name": "Destini",
+  "description": "A digital sanctuary rooted in Chinese I Ching wisdom — Physiognomy, BaZi, Naming, Liu Yao, and Healing.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0e8da",
+  "theme_color": "#9a2a1b",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
