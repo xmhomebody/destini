@@ -223,6 +223,23 @@ body {
 }
 
 /* 羊皮纸纹理背景：通过多层径向渐变模拟纤维 */
+/* 渐显动画：用于 Face Analysis 标记逐个登场 */
+@keyframes destini-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.destini-feature {
+  opacity: 0;
+  animation: destini-fade-up 0.55s ease-out forwards;
+  transform-origin: center;
+}
+
 .parchment-bg {
   background-color: var(--color-parchment);
   background-image:

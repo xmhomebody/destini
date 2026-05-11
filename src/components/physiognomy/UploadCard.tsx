@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FaceAnalysisModal } from "./FaceAnalysisModal";
 
 type Requirement = { label: string; path: string };
 
@@ -27,6 +28,7 @@ const INPUT_ID = "photo-upload";
 
 export function UploadCard() {
   const [preview, setPreview] = useState<string | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -99,6 +101,7 @@ export function UploadCard() {
       {preview ? (
         <button
           type="button"
+          onClick={() => setAnalyzing(true)}
           className="mt-6 w-full py-4 rounded-full font-[family-name:var(--font-cinzel)] text-base tracking-[0.2em] uppercase text-white transition-all duration-200 active:scale-[0.97]"
           style={{
             background: "linear-gradient(180deg, #c23a26 0%, #8a1e10 100%)",
@@ -130,6 +133,10 @@ export function UploadCard() {
           </svg>
           Upload Photo
         </label>
+      )}
+
+      {analyzing && preview && (
+        <FaceAnalysisModal imageSrc={preview} onClose={() => setAnalyzing(false)} />
       )}
 
       <div className="mt-6 pt-5 border-t border-gold/30 grid grid-cols-4 gap-2">
