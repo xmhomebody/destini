@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { TopNav } from "@/components/home/TopNav";
 import { Hero } from "@/components/home/Hero";
 import { Services } from "@/components/home/Services";
 import { HomeFooter } from "@/components/home/HomeFooter";
@@ -67,10 +66,9 @@ export default function Home() {
 
       {/* 内容层：z-10 浮于背景图之上，居中收窄 */}
       <div className="relative z-10 min-h-screen w-full max-w-md mx-auto flex flex-col">
-        <TopNav />
         <Hero />
         <Services />
-<HomeFooter />
+        <HomeFooter />
       </div>
     </>
   );

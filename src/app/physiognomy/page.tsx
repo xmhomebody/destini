@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { PhysiognomyTopNav } from "@/components/physiognomy/PhysiognomyTopNav";
 import { PhysiognomyHero } from "@/components/physiognomy/PhysiognomyHero";
 import { UploadCard } from "@/components/physiognomy/UploadCard";
@@ -44,25 +43,9 @@ export default function PhysiognomyPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* 背景图层：与首页一致的全宽羊皮纸 + 山水底图 */}
-      <div className="fixed inset-0 z-0">
-        <Image
-          src="/images/img_index_bg.png"
-          alt=""
-          fill
-          priority
-          className="object-cover object-top"
-          sizes="100vw"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(240,232,218,0.55) 0%, rgba(240,232,218,0.78) 60%, rgba(240,232,218,0.92) 100%)",
-          }}
-        />
-      </div>
+      {/* 背景图层：纯羊皮纸底色（不透明）+ 轻微纹理径向晕染 */}
+      <div className="fixed inset-0 z-0 parchment-bg" />
+
 
       {/* 顶部导航：全宽铺满视口，背景自适应 */}
       <PhysiognomyTopNav />
