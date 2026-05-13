@@ -6,7 +6,7 @@ export function PhysiognomyHero() {
   return (
     <header className="text-center mt-6 mb-6 px-4">
       <h1 className="font-[family-name:var(--font-cinzel)] text-3xl sm:text-4xl tracking-[0.18em] uppercase text-cinnabar leading-[1.15]">
-        Physiognomy
+        Face
         <span className="block">Reading</span>
       </h1>
 

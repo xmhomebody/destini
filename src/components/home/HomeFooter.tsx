@@ -28,14 +28,22 @@ const features: Feature[] = [
   },
 ];
 
+const BRIGHT_YELLOW = "#e8c468";
+
 export function HomeFooter() {
   return (
-    <footer className="mt-4 pb-8 w-full">
+    <footer className="mt-1 pb-4 w-full relative z-10" style={{ color: BRIGHT_YELLOW }}>
       {/* 三个核心承诺 */}
-      <div className="flex justify-center gap-6 px-6 mb-8 border-b border-gold/30 pb-6 w-[90%] mx-auto">
+      <div
+        className="flex justify-center gap-6 px-6 mb-8 pb-6 w-[90%] mx-auto"
+        style={{ borderBottom: `1px solid ${BRIGHT_YELLOW}` }}
+      >
         {features.map((f) => (
           <div key={f.label} className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full border border-gold flex items-center justify-center text-ink-light shrink-0">
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+              style={{ border: `1px solid ${BRIGHT_YELLOW}`, color: BRIGHT_YELLOW }}
+            >
               <svg
                 aria-hidden
                 className="w-4 h-4"
@@ -51,7 +59,7 @@ export function HomeFooter() {
                 />
               </svg>
             </div>
-            <div className="text-[10px] text-ink-dark leading-tight">
+            <div className="text-[10px] leading-tight" style={{ color: BRIGHT_YELLOW }}>
               {f.label}
               <div>{f.sub}</div>
             </div>
@@ -60,7 +68,10 @@ export function HomeFooter() {
       </div>
 
       {/* 底部三段式 tagline */}
-      <div className="text-center flex justify-center items-center gap-4 text-[9px] tracking-[0.2em] text-ink-light uppercase pb-4">
+      <div
+        className="text-center flex justify-center items-center gap-4 text-[9px] tracking-[0.2em] uppercase pb-4"
+        style={{ color: BRIGHT_YELLOW }}
+      >
         <span>Honoring Wisdom</span>
         <span aria-hidden>•</span>
         <span>Respecting Fate</span>

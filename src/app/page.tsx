@@ -2,7 +2,6 @@ import Image from "next/image";
 import { TopNav } from "@/components/home/TopNav";
 import { Hero } from "@/components/home/Hero";
 import { Services } from "@/components/home/Services";
-import { HomeCta } from "@/components/home/HomeCta";
 import { HomeFooter } from "@/components/home/HomeFooter";
 
 export default function Home() {
@@ -45,13 +44,23 @@ export default function Home() {
           className="object-cover object-top"
           sizes="100vw"
         />
-        {/* 半透明羊皮纸遮罩：底部加深保证文字可读性 */}
+        {/* 八卦图中心高光：径向渐变 + 混合模式，提亮约 30% */}
         <div
           aria-hidden
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(240,232,218,0.30) 0%, rgba(240,232,218,0.50) 60%, rgba(240,232,218,0.78) 100%)",
+              "radial-gradient(circle at 50% 32%, rgba(255, 230, 150, 0.32) 0%, rgba(255, 220, 120, 0.20) 18%, rgba(255, 200, 80, 0.08) 35%, transparent 55%)",
+            mixBlendMode: "screen",
+          }}
+        />
+        {/* 底部黑色渐变：从透明过渡到 70% 不透明黑 */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[42%] pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.25) 45%, rgba(0, 0, 0, 0.55) 80%, rgba(0, 0, 0, 0.70) 100%)",
           }}
         />
       </div>
@@ -61,8 +70,7 @@ export default function Home() {
         <TopNav />
         <Hero />
         <Services />
-        <HomeCta />
-        <HomeFooter />
+<HomeFooter />
       </div>
     </>
   );

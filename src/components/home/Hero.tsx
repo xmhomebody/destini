@@ -6,7 +6,7 @@ export function Hero() {
   return (
     <header className="text-center mt-6 px-4 relative z-10">
       <div className="flex justify-center items-start gap-2">
-        <h1 className="font-[family-name:var(--font-cinzel)] text-6xl md:text-7xl text-cinnabar font-medium tracking-tight">
+        <h1 className="font-[family-name:var(--font-cinzel)] text-6xl md:text-7xl text-cinnabar font-medium tracking-tight glow-breathe">
           Destini
         </h1>
         {/* 朱砂印章：竖排"天命"二字，呼应品牌词源 */}
@@ -15,7 +15,7 @@ export function Hero() {
         </div>
       </div>
 
-      <p className="mt-4 text-sm tracking-wide text-ink-dark uppercase opacity-80">
+      <p className="mt-4 text-sm tracking-wide text-ink-dark uppercase opacity-80 glow-breathe" style={{ animationDelay: "0.8s" }}>
         Ancient Insight, Ritual Guidance, Inner Healing
       </p>
 

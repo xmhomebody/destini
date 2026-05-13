@@ -13,6 +13,8 @@ type ServiceCardProps = {
   icon: ReactNode;
   /** 大尺寸卡片用于"相学"主推位 */
   size?: "sm" | "lg";
+  /** 让图标撑满整个圆形容器 */
+  iconFill?: boolean;
 };
 
 export function ServiceCard({
@@ -21,6 +23,7 @@ export function ServiceCard({
   description,
   icon,
   size = "sm",
+  iconFill = false,
 }: ServiceCardProps) {
   const isLg = size === "lg";
 
@@ -33,11 +36,23 @@ export function ServiceCard({
     >
       {/* 圆形图标容器：羊皮纸内胆 + 金线描边 */}
       <div
-        className={`rounded-full bg-parchment-dark border border-gold mb-3 flex items-center justify-center overflow-hidden ${
-          isLg ? "w-24 h-24" : "w-20 h-20"
-        }`}
+        className={`rounded-full mb-3 overflow-hidden ${
+          iconFill
+            ? ""
+            : "bg-parchment-dark border border-gold flex items-center justify-center"
+        } ${isLg ? "w-24 h-24" : "w-20 h-20"}`}
       >
-        <div className={isLg ? "w-14 h-14" : "w-12 h-12"}>{icon}</div>
+        <div
+          className={
+            iconFill
+              ? "w-full h-full"
+              : isLg
+              ? "w-14 h-14"
+              : "w-12 h-12"
+          }
+        >
+          {icon}
+        </div>
       </div>
 
       <h2

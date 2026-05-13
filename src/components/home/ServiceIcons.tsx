@@ -109,6 +109,33 @@ export function LiuyaoIcon({ className }: { className?: string }) {
   );
 }
 
+/** 手相：手掌轮廓 + 掌纹线 */
+export function PalmReadingIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* 手掌轮廓 */}
+      <path
+        d="M22 52 C18 52 14 48 14 44 L14 28 C14 26 16 24 18 24 L18 18 C18 16 20 14 22 14 C24 14 26 16 26 18 L26 22 C26 20 28 18 30 18 C32 18 34 20 34 22 L34 22 C34 20 36 18 38 18 C40 18 42 20 42 22 L42 24 C44 24 46 26 46 28 L46 38 C46 44 42 52 36 52 Z"
+        stroke={stroke}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {/* 生命线 */}
+      <path d="M22 42 C24 36 24 30 22 24" stroke={accent} strokeWidth="1" strokeLinecap="round" opacity="0.8" />
+      {/* 感情线 */}
+      <path d="M22 34 C28 32 34 32 40 34" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+      {/* 智慧线 */}
+      <path d="M22 38 C27 37 33 36 38 38" stroke={stroke} strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** 疗愈：八瓣莲花 */
 export function HealingIcon({ className }: { className?: string }) {
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { FaceAnalysisModal } from "./FaceAnalysisModal";
 
 type Requirement = { label: string; path: string };
@@ -73,21 +74,12 @@ export function UploadCard() {
             className="w-full h-full object-cover rounded-3xl"
           />
         ) : (
-          <svg
-            aria-hidden
-            className="w-40 h-40 text-gold/60"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            viewBox="0 0 100 100"
-          >
-            <path d="M50 15 C30 15 20 35 20 50 C20 70 35 85 50 90 C65 85 80 70 80 50 C80 35 70 15 50 15 Z" />
-            <path d="M35 45 C40 43 45 43 50 45 M65 45 C60 43 55 43 50 45" />
-            <circle cx="38" cy="50" r="2" fill="currentColor" />
-            <circle cx="62" cy="50" r="2" fill="currentColor" />
-            <path d="M50 55 L50 65 L48 67" />
-            <path d="M40 75 Q50 80 60 75" />
-          </svg>
+          <Image
+            src="/images/img_facer_upload.png"
+            alt=""
+            fill
+            className="object-cover opacity-50"
+          />
         )}
       </label>
 

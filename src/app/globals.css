@@ -223,21 +223,53 @@ body {
 }
 
 /* 羊皮纸纹理背景：通过多层径向渐变模拟纤维 */
-/* 渐显动画：用于 Face Analysis 标记逐个登场 */
-@keyframes destini-fade-up {
+/* Face Analysis markers: reveal first, then keep flashing above the photo mask. */
+@keyframes destini-feature-reveal {
   from {
     opacity: 0;
-    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
-.destini-feature {
+
+@keyframes destini-feature-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 0.28;
+  }
+  58% {
+    opacity: 0.78;
+  }
+}
+
+@keyframes destini-feature-label-flash {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.destini-feature-marker,
+.destini-feature-label {
   opacity: 0;
-  animation: destini-fade-up 0.55s ease-out forwards;
-  transform-origin: center;
+  animation-name: destini-feature-reveal, destini-feature-flash;
+  animation-duration: 0.45s, 1.15s;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-delay: var(--feature-delay, 0ms), calc(var(--feature-delay, 0ms) + 450ms);
+  animation-fill-mode: forwards, none;
+  animation-iteration-count: 1, infinite;
+}
+
+.destini-feature-label {
+  animation-name: destini-feature-reveal, destini-feature-label-flash;
+  animation-duration: 0.45s, 1.725s;
 }
 
 .parchment-bg {
@@ -293,6 +325,29 @@ body {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@keyframes glow-breathe {
+  0%, 100% {
+    text-shadow:
+      0 0 5px rgba(255, 230, 120, 0.2),
+      0 0 14px rgba(255, 200, 40, 0.08),
+      0 0 29px rgba(255, 180, 0, 0.04);
+  }
+  50% {
+    text-shadow:
+      0 0 14px rgba(255, 245, 180, 1),
+      0 0 34px rgba(255, 220, 80, 1),
+      0 0 67px rgba(255, 200, 40, 0.95),
+      0 0 120px rgba(255, 180, 0, 0.75),
+      0 0 192px rgba(255, 160, 0, 0.5);
+  }
+}
+
+@layer utilities {
+  .glow-breathe {
+    animation: glow-breathe 3s ease-in-out infinite;
+  }
 }
 
 @layer base {

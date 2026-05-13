@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type * as FaceApiNS from "face-api.js";
 
 type Props = {
@@ -98,29 +99,8 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
         return;
       }
 
-      const built = buildFeatures(detection);
-
-      // Mole / scar detection inside face bbox
-      const moles = detectMoles(img, detection);
-      const faceW = detection.detection.box.width;
       const faceH = detection.detection.box.height;
-      const G = faceH * 0.04;
-      moles.forEach((m, i) => {
-        // Push mole labels outward away from face center to avoid clashing
-        const centerX = detection.detection.box.x + faceW / 2;
-        const goesRight = m.x >= centerX;
-        built.push({
-          key: `mole-${i}`,
-          en: "Mole",
-          reading: "A distinguishing mark — a sign of fortune unique to you.",
-          points: [m],
-          labelPos: {
-            x: m.x + (goesRight ? G * 0.9 : -G * 0.9),
-            y: m.y - G * 0.2,
-          },
-          align: goesRight ? "start" : "end",
-        });
-      });
+      const built = buildFeatures(detection);
 
       // Final pass: nudge labels that are still vertically too close on the same side
       resolveLabelCollisions(built, faceH);
@@ -181,8 +161,8 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
 
   const labelFontSize = imgRect ? Math.max(11, Math.min(16, imgRect.width / 30)) : 13;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-ink-dark/95 backdrop-blur-sm flex flex-col">
+  const modal = (
+    <div className="fixed inset-0 z-[100] bg-ink-dark/95 backdrop-blur-sm flex flex-col">
       <header className="relative flex items-center justify-between px-4 py-3 border-b border-gold/30 text-parchment">
         <button
           onClick={onClose}
@@ -211,6 +191,18 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
           }`}
         />
 
+        {imgRect && imageLoaded && (
+          <div
+            className="absolute pointer-events-none bg-black/30"
+            style={{
+              left: imgRect.left,
+              top: imgRect.top,
+              width: imgRect.width,
+              height: imgRect.height,
+            }}
+          />
+        )}
+
         {imgRect && features.length > 0 && overlayReady && (
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
@@ -226,46 +218,57 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
               </filter>
             </defs>
 
-            {features.map((f, idx) => {
-              const projected = f.points.map(project);
-              const label = project(f.labelPos);
-              const isPoint = projected.length === 1;
-              const d = isPoint
-                ? ""
-                : projected
-                    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-                    .join(" ") + (f.closed ? " Z" : "");
-              const fontSize = f.small ? labelFontSize * 0.78 : labelFontSize;
-              return (
-                <g
-                  key={f.key}
-                  className="destini-feature"
-                  style={{ animationDelay: `${idx * 90}ms` }}
-                >
-                  {!isPoint && (
-                    <path
-                      d={d}
-                      fill="none"
-                      stroke="#c2a878"
-                      strokeWidth={1.4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      opacity={0.95}
-                      filter="url(#glow)"
-                    />
-                  )}
-                  {projected.map((p, i) => (
-                    <circle
-                      key={i}
-                      cx={p.x}
-                      cy={p.y}
-                      r={isPoint ? 4 : 2.2}
-                      fill={isPoint ? "#c2a878" : "#9a2a1b"}
-                      stroke="#f0e8da"
-                      strokeWidth={isPoint ? 1 : 0.6}
-                    />
-                  ))}
+            <g aria-hidden="true">
+              {features.map((f, idx) => {
+                const projected = f.points.map(project);
+                const isPoint = projected.length === 1;
+                const d = isPoint
+                  ? ""
+                  : projected
+                      .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+                      .join(" ") + (f.closed ? " Z" : "");
+                return (
+                  <g
+                    key={`marker-${f.key}`}
+                    className="destini-feature-marker"
+                    style={{ "--feature-delay": `${idx * 90}ms` } as CSSProperties}
+                  >
+                    {!isPoint && (
+                      <path
+                        d={d}
+                        fill="none"
+                        stroke="#c2a878"
+                        strokeWidth={1.4}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        opacity={0.95}
+                        filter="url(#glow)"
+                      />
+                    )}
+                    {projected.map((p, i) => (
+                      <circle
+                        key={i}
+                        cx={p.x}
+                        cy={p.y}
+                        r={isPoint ? 4 : 2.2}
+                        fill={isPoint ? "#c2a878" : "#9a2a1b"}
+                        stroke="#f0e8da"
+                        strokeWidth={isPoint ? 1 : 0.6}
+                      />
+                    ))}
+                  </g>
+                );
+              })}
+            </g>
+
+            <g>
+              {features.map((f, idx) => {
+                const label = project(f.labelPos);
+                const fontSize = f.small ? labelFontSize * 0.78 : labelFontSize;
+                return (
                   <text
+                    key={`label-${f.key}`}
+                    className="destini-feature-label"
                     x={label.x}
                     y={label.y}
                     textAnchor={f.align}
@@ -275,13 +278,18 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
                     fontWeight={600}
                     fontSize={fontSize}
                     letterSpacing="0.12em"
-                    style={{ mixBlendMode: "difference", textTransform: "uppercase" }}
+                    style={
+                      {
+                        "--feature-delay": `${idx * 90}ms`,
+                        textTransform: "uppercase",
+                      } as CSSProperties
+                    }
                   >
                     {f.en}
                   </text>
-                </g>
-              );
-            })}
+                );
+              })}
+            </g>
           </svg>
         )}
 
@@ -327,6 +335,9 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
       )}
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }
 
 // =============================================================================
@@ -341,8 +352,6 @@ function buildFeatures(
   const jaw = lm.getJawOutline();
   const rightBrow = lm.getRightEyeBrow(); // subject's right, image-left
   const leftBrow = lm.getLeftEyeBrow(); // subject's left, image-right
-  const rightEye = lm.getRightEye();
-  const leftEye = lm.getLeftEye();
   const outerLips = lm.getMouth().slice(0, 12);
 
   // Outer brow ends (subject's right = image-left side)
@@ -587,120 +596,5 @@ function resolveLabelCollisions(features: Feature[], faceH: number) {
       const minY = prev.labelPos.y + minSpacing;
       if (cur.labelPos.y < minY) cur.labelPos.y = minY;
     }
-  }
-}
-
-// =============================================================================
-// Mole / scar detection
-// =============================================================================
-
-function detectMoles(
-  img: HTMLImageElement,
-  detection: FaceApiNS.WithFaceLandmarks<{ detection: FaceApiNS.FaceDetection }, FaceApiNS.FaceLandmarks68>,
-): Pt[] {
-  try {
-    const SCALE = 0.5;
-    const w = Math.max(1, Math.floor(img.naturalWidth * SCALE));
-    const h = Math.max(1, Math.floor(img.naturalHeight * SCALE));
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return [];
-    ctx.drawImage(img, 0, 0, w, h);
-
-    const box = detection.detection.box;
-    const bx = Math.max(0, Math.floor(box.x * SCALE));
-    const by = Math.max(0, Math.floor(box.y * SCALE));
-    const bw = Math.min(w - bx, Math.floor(box.width * SCALE));
-    const bh = Math.min(h - by, Math.floor(box.height * SCALE));
-    if (bw <= 0 || bh <= 0) return [];
-
-    const imageData = ctx.getImageData(bx, by, bw, bh);
-    const data = imageData.data;
-    const cellSize = Math.max(4, Math.floor(bw / 40));
-    const cols = Math.floor(bw / cellSize);
-    const rows = Math.floor(bh / cellSize);
-    if (cols < 5 || rows < 5) return [];
-
-    const lum: number[][] = [];
-    for (let r = 0; r < rows; r++) {
-      lum.push([]);
-      for (let c = 0; c < cols; c++) {
-        let sum = 0;
-        let count = 0;
-        for (let dy = 0; dy < cellSize; dy++) {
-          for (let dx = 0; dx < cellSize; dx++) {
-            const px = c * cellSize + dx;
-            const py = r * cellSize + dy;
-            const idx = (py * bw + px) * 4;
-            sum += 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-            count++;
-          }
-        }
-        lum[r].push(sum / count);
-      }
-    }
-
-    const exclude: { x: number; y: number; r: number }[] = [];
-    const lmk = detection.landmarks;
-    const faceW = box.width;
-    const addRegion = (pts: { x: number; y: number }[], padding: number) => {
-      for (const p of pts) exclude.push({ x: p.x, y: p.y, r: padding });
-    };
-    addRegion(lmk.getLeftEye(), faceW * 0.06);
-    addRegion(lmk.getRightEye(), faceW * 0.06);
-    addRegion(lmk.getLeftEyeBrow(), faceW * 0.05);
-    addRegion(lmk.getRightEyeBrow(), faceW * 0.05);
-    addRegion(lmk.getMouth(), faceW * 0.04);
-    addRegion(lmk.getNose().slice(4), faceW * 0.04);
-    addRegion(lmk.getJawOutline(), faceW * 0.04);
-
-    type Cand = { r: number; c: number; lum: number; contrast: number };
-    const candidates: Cand[] = [];
-    const ring = 3;
-    for (let r = ring; r < rows - ring; r++) {
-      for (let c = ring; c < cols - ring; c++) {
-        const center = lum[r][c];
-        let sum = 0;
-        let count = 0;
-        for (let dr = -ring; dr <= ring; dr++) {
-          for (let dc = -ring; dc <= ring; dc++) {
-            if (Math.abs(dr) <= 1 && Math.abs(dc) <= 1) continue;
-            sum += lum[r + dr][c + dc];
-            count++;
-          }
-        }
-        const ringMean = sum / count;
-        if (ringMean <= 0) continue;
-        const contrast = (ringMean - center) / ringMean;
-        if (contrast > 0.3 && center < 110) {
-          candidates.push({ r, c, lum: center, contrast });
-        }
-      }
-    }
-
-    const points = candidates.map((cand) => ({
-      x: (bx + cand.c * cellSize + cellSize / 2) / SCALE,
-      y: (by + cand.r * cellSize + cellSize / 2) / SCALE,
-      contrast: cand.contrast,
-    }));
-
-    const filtered = points.filter((p) =>
-      exclude.every((ex) => Math.hypot(p.x - ex.x, p.y - ex.y) > ex.r),
-    );
-
-    filtered.sort((a, b) => b.contrast - a.contrast);
-    const merged: typeof filtered = [];
-    const minSep = box.width * 0.08;
-    for (const p of filtered) {
-      if (merged.every((m) => Math.hypot(m.x - p.x, m.y - p.y) > minSep)) {
-        merged.push(p);
-      }
-      if (merged.length >= 2) break;
-    }
-    return merged.map((p) => ({ x: p.x, y: p.y }));
-  } catch {
-    return [];
   }
 }
