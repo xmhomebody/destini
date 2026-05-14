@@ -13,6 +13,9 @@ import {
   type ClassifiedLine,
   type LineKey,
 } from "./extractPalmLines";
+import { EmailGate } from "@/components/common/EmailGate";
+import { hasUserIdentity } from "@/lib/userAuth";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   imageSrc: string;
@@ -22,10 +25,6 @@ type Props = {
 type Pt = { x: number; y: number };
 
 type RenderLine = ClassifiedLine & {
-  /** Label English title */
-  en: string;
-  /** Reading paragraph */
-  reading: string;
   /** Stroke color */
   color: string;
   /** Label anchor point in normalized image coords */
@@ -34,15 +33,7 @@ type RenderLine = ClassifiedLine & {
   align: "start" | "middle" | "end";
 };
 
-const STATUS_MESSAGES = {
-  loading: "Awakening the ancient gaze…",
-  detecting: "Reading the lines of your palm…",
-  extracting: "Tracing your palm's creases…",
-  none: "No palm was found. Please try another photo.",
-  empty: "Could not trace the lines clearly. Try a sharper, well-lit photo.",
-  ready: "",
-} as const;
-type Status = keyof typeof STATUS_MESSAGES;
+type Status = "loading" | "detecting" | "extracting" | "none" | "empty" | "ready";
 
 const WASM_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm";
 const MODEL_URL =
@@ -55,39 +46,21 @@ const LINE_ORDER: LineKey[] = ["heart", "head", "life", "fate", "marriage"];
  * 五条纹路对应的展示元数据：颜色、读解文字。
  * 颜色选用高饱和度，在深色照片蒙版上仍清晰可辨且互不混淆。
  */
-const LINE_META: Record<
-  LineKey,
-  {
-    en: string;
-    reading: string;
-    color: string;
-  }
-> = {
-  heart: {
-    en: "Heart Line",
-    color: "#ff5d73", // 朱粉
-    reading: "A flowing heart line — affection runs deep, your bonds steady and true.",
-  },
-  head: {
-    en: "Head Line",
-    color: "#4fc3f7", // 青蓝
-    reading: "A clear head line — sharp judgment, the mind walks its own measured path.",
-  },
-  life: {
-    en: "Life Line",
-    color: "#9be564", // 苹果绿
-    reading: "A long, curving life line — vitality endures, the body weathers each season.",
-  },
-  fate: {
-    en: "Fate Line",
-    color: "#ffd54f", // 金黄
-    reading: "A rising fate line — destiny inscribes itself; the work of your hands will be seen.",
-  },
-  marriage: {
-    en: "Marriage Line",
-    color: "#ce93d8", // 紫罗兰
-    reading: "A clear marriage line — partnership finds its season, the union endures.",
-  },
+const LINE_COLORS: Record<LineKey, string> = {
+  heart: "#ff5d73",
+  head: "#4fc3f7",
+  life: "#9be564",
+  fate: "#ffd54f",
+  marriage: "#ce93d8",
+};
+
+/** 标签宽度估算（用于碰撞分散），按英文标签字符数近似 */
+const LABEL_WIDTH_HINT: Record<LineKey, string> = {
+  heart: "Heart Line",
+  head: "Head Line",
+  life: "Life Line",
+  fate: "Fate Line",
+  marriage: "Marriage Line",
 };
 
 const regularizePalmLine = (
@@ -137,6 +110,7 @@ const regularizePalmLine = (
 };
 
 export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
+  const t = useT();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<Status>("loading");
@@ -144,6 +118,7 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
   const [lines, setLines] = useState<RenderLine[]>([]);
   const [overlayReady, setOverlayReady] = useState(false);
   const [readingsReady, setReadingsReady] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [imgRect, setImgRect] = useState<{
     left: number;
     top: number;
@@ -282,12 +257,25 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
       });
     }
     recompute();
+    const container = containerRef.current;
+    const ro = container ? new ResizeObserver(recompute) : null;
+    if (container && ro) ro.observe(container);
     window.addEventListener("resize", recompute);
-    return () => window.removeEventListener("resize", recompute);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", recompute);
+    vv?.addEventListener("scroll", recompute);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", recompute);
+      vv?.removeEventListener("resize", recompute);
+      vv?.removeEventListener("scroll", recompute);
+    };
   }, [imageSrc, imageLoaded, status]);
 
   useEffect(() => {
     if (status !== "ready" || !imageLoaded) return;
+    // 已留邮箱 / 唤回链接已写入 → 直接解锁分析报告；否则等用户操作
+    if (hasUserIdentity()) setUnlocked(true);
     const t1 = setTimeout(() => setOverlayReady(true), 250);
     const t2 = setTimeout(() => setReadingsReady(true), 250 + lines.length * 150 + 200);
     return () => {
@@ -319,7 +307,7 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
           </svg>
         </button>
         <h2 className="font-[family-name:var(--font-cinzel)] text-sm tracking-[0.3em] uppercase text-gold">
-          Palm Reading
+          {t("palm.modal.title")}
         </h2>
         <span className="w-9 h-9" aria-hidden />
       </header>
@@ -431,7 +419,7 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
                       letterSpacing="0.12em"
                       style={{ textTransform: "uppercase" }}
                     >
-                      {line.en}
+                      {t(`palm.line.${line.key}.label`)}
                     </text>
                     <text
                       x={label.x}
@@ -445,7 +433,7 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
                       letterSpacing="0.12em"
                       style={{ textTransform: "uppercase" }}
                     >
-                      {line.en}
+                      {t(`palm.line.${line.key}.label`)}
                     </text>
                   </g>
                 );
@@ -461,7 +449,7 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
                 <div className="mx-auto mb-4 w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
               )}
               <p className="font-[family-name:var(--font-cinzel)] text-sm tracking-[0.25em] uppercase text-gold">
-                {STATUS_MESSAGES[status]}
+                {t(`palm.modal.status.${status}`)}
               </p>
             </div>
           </div>
@@ -470,32 +458,36 @@ export function PalmAnalysisModal({ imageSrc, onClose }: Props) {
 
       {status === "ready" && (
         <div
-          className={`border-t border-gold/30 bg-ink-dark/60 max-h-[40vh] overflow-y-auto transition-all duration-700 ease-out ${
+          className={`border-t border-gold/30 bg-ink-dark/60 h-[40vh] overflow-y-auto transition-all duration-700 ease-out ${
             readingsReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="max-w-md mx-auto px-4 py-4 space-y-3">
-            <p className="font-[family-name:var(--font-cinzel)] text-[10px] tracking-[0.4em] uppercase text-gold/80 text-left">
-              The Five Lines of the Palm
-            </p>
-            {lines.map((line) => (
-              <div
-                key={`palm-r-${line.key}`}
-                className="p-3 rounded-lg border border-gold/20 bg-parchment/5 text-left"
-                style={{ borderLeft: `3px solid ${line.color}` }}
-              >
-                <p
-                  className="font-[family-name:var(--font-cinzel)] text-[11px] tracking-[0.2em] uppercase mb-1.5"
-                  style={{ color: line.color }}
+          {unlocked ? (
+            <div className="max-w-md mx-auto px-4 py-4 space-y-3">
+              <p className="font-[family-name:var(--font-cinzel)] text-[10px] tracking-[0.4em] uppercase text-gold/80 text-left">
+                {t("palm.modal.five_lines")}
+              </p>
+              {lines.map((line) => (
+                <div
+                  key={`palm-r-${line.key}`}
+                  className="p-3 rounded-lg border border-gold/20 bg-parchment/5 text-left"
+                  style={{ borderLeft: `3px solid ${line.color}` }}
                 >
-                  {line.en}
-                </p>
-                <p className="text-parchment/90 text-[13px] leading-relaxed font-[family-name:var(--font-playfair)] text-left">
-                  {line.reading}
-                </p>
-              </div>
-            ))}
-          </div>
+                  <p
+                    className="font-[family-name:var(--font-cinzel)] text-[11px] tracking-[0.2em] uppercase mb-1.5"
+                    style={{ color: line.color }}
+                  >
+                    {t(`palm.line.${line.key}.label`)}
+                  </p>
+                  <p className="text-parchment/90 text-[13px] leading-relaxed font-[family-name:var(--font-playfair)] text-left">
+                    {t(`palm.line.${line.key}.reading`)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmailGate onUnlock={() => setUnlocked(true)} />
+          )}
         </div>
       )}
     </div>
@@ -567,7 +559,6 @@ function decorateForRender(
   }
 
   const decorated = lines.map((line) => {
-    const meta = LINE_META[line.key];
     const start = line.points[0];
     const end = line.points[line.points.length - 1];
     const mid = line.points[Math.floor(line.points.length / 2)];
@@ -604,9 +595,7 @@ function decorateForRender(
 
     return {
       ...line,
-      en: meta.en,
-      reading: meta.reading,
-      color: meta.color,
+      color: LINE_COLORS[line.key],
       labelPos,
       align: "middle" as const,
     };
@@ -671,7 +660,7 @@ function separateLabels(lines: RenderLine[]): RenderLine[] {
       for (let j = i + 1; j < adjusted.length; j++) {
         const a = adjusted[i];
         const b = adjusted[j];
-        const minX = labelHalfWidth(a.en) + labelHalfWidth(b.en);
+        const minX = labelHalfWidth(LABEL_WIDTH_HINT[a.key]) + labelHalfWidth(LABEL_WIDTH_HINT[b.key]);
         const minY = 0.055;
         const dx = Math.abs(a.labelPos.x - b.labelPos.x);
         const dy = Math.abs(a.labelPos.y - b.labelPos.y);

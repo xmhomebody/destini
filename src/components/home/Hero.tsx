@@ -1,8 +1,13 @@
+"use client";
+
+import { useT } from "@/lib/i18n";
+
 /**
  * 首屏品牌区
  * 巨幅 Destini 标题 + 朱砂"天命"印章 + 副标题 + 装饰分隔线
  */
 export function Hero() {
+  const t = useT();
   return (
     <header className="text-center mt-6 px-4 relative z-10">
       <div className="flex justify-center items-start gap-2">
@@ -16,7 +21,7 @@ export function Hero() {
       </div>
 
       <p className="mt-4 text-sm tracking-wide text-ink-dark uppercase opacity-80 glow-breathe" style={{ animationDelay: "0.8s" }}>
-        Ancient Insight, Ritual Guidance, Inner Healing
+        {t("home.tagline")}
       </p>
 
       {/* 装饰分隔：菱形 + 双侧短线，模拟卷轴中缝纹饰 */}

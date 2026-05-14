@@ -1,47 +1,29 @@
-/**
- * 相学要旨卡：左侧"命理纲要"+ 右侧"重点观察部位"
- * 中央菱形分隔，体现两端对照
- */
+"use client";
 
-const principles = [
-  {
-    title: "Forehead",
-    body: "reveals early fortunes and wisdom.",
-  },
-  {
-    title: "Eyes",
-    body: "reflect spirit, insight, and emotional clarity.",
-  },
-  {
-    title: "Nose",
-    body: "indicates wealth flow, willpower, and stability.",
-  },
-  {
-    title: "Mouth & Chin",
-    body: "suggest relationships, harmony, and grounding.",
-  },
-];
+import { useT } from "@/lib/i18n";
 
-type Area = { label: string; svg: React.ReactElement };
+const principleKeys = ["forehead", "eyes", "nose", "mouth"] as const;
+
+type Area = { key: string; svg: React.ReactElement };
 const areas: Area[] = [
   {
-    label: "Forehead",
+    key: "face.area.forehead",
     svg: <path d="M7 8a5 5 0 0 1 10 0" strokeWidth="1.5" />,
   },
   {
-    label: "Cheeks",
+    key: "face.area.cheeks",
     svg: <circle cx="12" cy="12" r="5" strokeWidth="1.5" />,
   },
   {
-    label: "Brows",
+    key: "face.area.brows",
     svg: <path d="M6 10Q12 6 18 10" strokeWidth="1.5" />,
   },
   {
-    label: "Mouth",
+    key: "face.area.mouth",
     svg: <path d="M7 14Q12 18 17 14" strokeWidth="1.5" />,
   },
   {
-    label: "Eyes",
+    key: "face.area.eyes",
     svg: (
       <>
         <path d="M4 12C4 12 8 16 12 16C16 16 20 12 20 12" strokeWidth="1.5" />
@@ -50,11 +32,11 @@ const areas: Area[] = [
     ),
   },
   {
-    label: "Chin",
+    key: "face.area.chin",
     svg: <path d="M8 18Q12 22 16 18" strokeWidth="1.5" />,
   },
   {
-    label: "Nose",
+    key: "face.area.nose",
     svg: (
       <path
         d="M12 8L10 16H14L12 8Z"
@@ -64,7 +46,7 @@ const areas: Area[] = [
     ),
   },
   {
-    label: "Ears",
+    key: "face.area.ears",
     svg: (
       <>
         <path d="M6 8C6 8 4 10 4 13C4 16 6 18 6 18" strokeWidth="1.5" />
@@ -75,49 +57,50 @@ const areas: Area[] = [
 ];
 
 export function InsightsCard() {
+  const t = useT();
   return (
     <section className="ornate-card px-6 py-7">
-      {/* 卡内章节标题：金线包夹的朱砂小标题 */}
       <div className="flex items-center mb-5" aria-hidden>
         <span className="flex-1 h-px bg-gold/40" />
         <h2 className="mx-3 font-[family-name:var(--font-cinzel)] text-base tracking-[0.2em] uppercase text-cinnabar">
-          Reading Insights
+          {t("face.insights")}
         </h2>
         <span className="flex-1 h-px bg-gold/40" />
       </div>
 
-      {/* 命理纲要 */}
       <h3 className="text-[11px] tracking-[0.2em] uppercase text-cinnabar pb-2 mb-3 border-b border-gold/30">
-        Destiny Principles
+        {t("face.destiny_principles")}
       </h3>
       <ul className="space-y-3">
-        {principles.map((p, i) => (
-          <li key={p.title} className="flex items-start gap-3">
+        {principleKeys.map((k, i) => (
+          <li key={k} className="flex items-start gap-3">
             <span className="shrink-0 w-6 h-6 rounded-full border border-gold bg-parchment-soft text-ink-dark flex items-center justify-center text-xs font-[family-name:var(--font-cinzel)]">
               {i + 1}
             </span>
             <p className="text-sm text-ink-dark leading-relaxed">
-              <span className="font-medium text-ink-dark">{p.title}</span>{" "}
-              <span className="text-ink-light">{p.body}</span>
+              <span className="font-medium text-ink-dark">
+                {t(`face.principle.${k}.title`)}
+              </span>{" "}
+              <span className="text-ink-light">
+                {t(`face.principle.${k}.body`)}
+              </span>
             </p>
           </li>
         ))}
       </ul>
 
-      {/* 中部菱形分隔 */}
       <div className="relative my-6" aria-hidden>
         <span className="block h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rotate-45 border border-gold bg-parchment" />
       </div>
 
-      {/* 重点观察部位：4×2 图标网格 */}
       <h3 className="text-[11px] tracking-[0.2em] uppercase text-cinnabar pb-2 mb-3 border-b border-gold/30">
-        Key Areas to Observe
+        {t("face.key_areas")}
       </h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm text-ink-dark">
         {areas.map((a) => (
           <div
-            key={a.label}
+            key={a.key}
             className="flex items-center gap-2.5 border-b border-dashed border-gold/30 pb-2"
           >
             <svg
@@ -129,7 +112,7 @@ export function InsightsCard() {
             >
               {a.svg}
             </svg>
-            <span>{a.label}</span>
+            <span>{t(a.key)}</span>
           </div>
         ))}
       </div>

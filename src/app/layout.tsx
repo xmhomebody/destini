@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cinzel, Playfair_Display, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { UrlTokenInit } from "@/components/common/UrlTokenInit";
+import { I18nProvider } from "@/lib/i18n";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -118,7 +120,10 @@ export default function RootLayout({
     >
       {/* body 透明：背景由页面的 fixed 图层接管，full viewport 铺满 */}
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-transparent">
-        {children}
+        <I18nProvider>
+          <UrlTokenInit />
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

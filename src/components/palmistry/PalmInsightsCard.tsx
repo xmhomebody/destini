@@ -1,89 +1,73 @@
-/**
- * 手相要旨卡：四大主线 + 八掌丘
- */
+"use client";
 
-const principles = [
-  {
-    title: "Heart Line",
-    body: "reveals emotional life, relationships, and capacity for love.",
-  },
-  {
-    title: "Head Line",
-    body: "reflects intellect, mindset, and decision-making style.",
-  },
-  {
-    title: "Life Line",
-    body: "indicates vitality, resilience, and life's overall flow.",
-  },
-  {
-    title: "Fate Line",
-    body: "traces career, calling, and the unseen hand of destiny.",
-  },
-  {
-    title: "Marriage Line",
-    body: "marks partnership, union, and lasting companionship.",
-  },
-];
+import { useT } from "@/lib/i18n";
 
-type Area = { label: string; svg: React.ReactElement };
+const principleKeys = ["heart", "head", "life", "fate", "marriage"] as const;
+
+type Area = { key: string; svg: React.ReactElement };
 const areas: Area[] = [
   {
-    label: "Jupiter Mount",
+    key: "palm.area.jupiter",
     svg: <circle cx="8" cy="8" r="3" strokeWidth="1.5" />,
   },
   {
-    label: "Saturn Mount",
+    key: "palm.area.saturn",
     svg: <circle cx="12" cy="6" r="3" strokeWidth="1.5" />,
   },
   {
-    label: "Apollo Mount",
+    key: "palm.area.apollo",
     svg: <circle cx="16" cy="8" r="3" strokeWidth="1.5" />,
   },
   {
-    label: "Mercury Mount",
+    key: "palm.area.mercury",
     svg: <circle cx="18" cy="11" r="2.5" strokeWidth="1.5" />,
   },
   {
-    label: "Mars Plain",
+    key: "palm.area.mars",
     svg: <path d="M8 12h8M12 9v6" strokeWidth="1.5" />,
   },
   {
-    label: "Venus Mount",
+    key: "palm.area.venus",
     svg: <path d="M6 14a4 4 0 014-4v8a4 4 0 01-4-4z" strokeWidth="1.5" />,
   },
   {
-    label: "Luna Mount",
+    key: "palm.area.luna",
     svg: <path d="M18 14a4 4 0 00-4-4v8a4 4 0 004-4z" strokeWidth="1.5" />,
   },
   {
-    label: "Wrist Bracelet",
+    key: "palm.area.wrist",
     svg: <path d="M5 19q7 3 14 0" strokeWidth="1.5" />,
   },
 ];
 
 export function PalmInsightsCard() {
+  const t = useT();
   return (
     <section className="ornate-card px-6 py-7">
       <div className="flex items-center mb-5" aria-hidden>
         <span className="flex-1 h-px bg-gold/40" />
         <h2 className="mx-3 font-[family-name:var(--font-cinzel)] text-base tracking-[0.2em] uppercase text-cinnabar">
-          Reading Insights
+          {t("palm.insights")}
         </h2>
         <span className="flex-1 h-px bg-gold/40" />
       </div>
 
       <h3 className="text-[11px] tracking-[0.2em] uppercase text-cinnabar pb-2 mb-3 border-b border-gold/30">
-        The Five Lines
+        {t("palm.five_lines")}
       </h3>
       <ul className="space-y-3">
-        {principles.map((p, i) => (
-          <li key={p.title} className="flex items-start gap-3">
+        {principleKeys.map((k, i) => (
+          <li key={k} className="flex items-start gap-3">
             <span className="shrink-0 w-6 h-6 rounded-full border border-gold bg-parchment-soft text-ink-dark flex items-center justify-center text-xs font-[family-name:var(--font-cinzel)]">
               {i + 1}
             </span>
             <p className="text-sm text-ink-dark leading-relaxed">
-              <span className="font-medium text-ink-dark">{p.title}</span>{" "}
-              <span className="text-ink-light">{p.body}</span>
+              <span className="font-medium text-ink-dark">
+                {t(`palm.principle.${k}.title`)}
+              </span>{" "}
+              <span className="text-ink-light">
+                {t(`palm.principle.${k}.body`)}
+              </span>
             </p>
           </li>
         ))}
@@ -95,12 +79,12 @@ export function PalmInsightsCard() {
       </div>
 
       <h3 className="text-[11px] tracking-[0.2em] uppercase text-cinnabar pb-2 mb-3 border-b border-gold/30">
-        Mounts of the Palm
+        {t("palm.mounts")}
       </h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm text-ink-dark">
         {areas.map((a) => (
           <div
-            key={a.label}
+            key={a.key}
             className="flex items-center gap-2.5 border-b border-dashed border-gold/30 pb-2"
           >
             <svg
@@ -112,7 +96,7 @@ export function PalmInsightsCard() {
             >
               {a.svg}
             </svg>
-            <span>{a.label}</span>
+            <span>{t(a.key)}</span>
           </div>
         ))}
       </div>

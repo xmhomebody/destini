@@ -1,15 +1,15 @@
-/**
- * 相学页首屏标题
- * 朱砂大写双行标题 + 金线分隔
- */
+"use client";
+
+import { useT } from "@/lib/i18n";
+
 export function PhysiognomyHero() {
+  const t = useT();
   return (
     <header className="text-center mt-6 mb-6 px-4">
       <h1 className="font-[family-name:var(--font-cinzel)] text-2xl sm:text-3xl tracking-[0.16em] uppercase text-cinnabar leading-[1.15] glow-static whitespace-nowrap">
-        Face Reading
+        {t("face.title")}
       </h1>
 
-      {/* 金线 + 中央菱形分隔，与首页 Hero 呼应 */}
       <div className="flex justify-center items-center mt-4 opacity-70" aria-hidden>
         <span className="block h-px w-12 bg-gold" />
         <svg

@@ -3,6 +3,9 @@
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type * as FaceApiNS from "face-api.js";
+import { EmailGate } from "@/components/common/EmailGate";
+import { hasUserIdentity } from "@/lib/userAuth";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   imageSrc: string;
@@ -28,15 +31,10 @@ type Feature = {
   closed?: boolean;
 };
 
-const STATUS_MESSAGES = {
-  loading: "Awakening the ancient gaze…",
-  detecting: "Reading the contours of your face…",
-  none: "No face was found. Please try another photo.",
-  ready: "",
-} as const;
-type Status = keyof typeof STATUS_MESSAGES;
+type Status = "loading" | "detecting" | "none" | "ready";
 
 export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
+  const t = useT();
   const imgRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<Status>("loading");
@@ -44,6 +42,7 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [overlayReady, setOverlayReady] = useState(false);
   const [readingsReady, setReadingsReady] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
   const [imgRect, setImgRect] = useState<{
     left: number;
     top: number;
@@ -138,12 +137,25 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
       });
     }
     recompute();
+    const container = containerRef.current;
+    const ro = container ? new ResizeObserver(recompute) : null;
+    if (container && ro) ro.observe(container);
     window.addEventListener("resize", recompute);
-    return () => window.removeEventListener("resize", recompute);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", recompute);
+    vv?.addEventListener("scroll", recompute);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", recompute);
+      vv?.removeEventListener("resize", recompute);
+      vv?.removeEventListener("scroll", recompute);
+    };
   }, [imageSrc, imageLoaded, status]);
 
   useEffect(() => {
     if (status !== "ready" || !imageLoaded) return;
+    // 已留邮箱 / 唤回链接已写入 → 直接解锁分析报告；否则等用户操作
+    if (hasUserIdentity()) setUnlocked(true);
     const t1 = setTimeout(() => setOverlayReady(true), 250);
     const t2 = setTimeout(() => setReadingsReady(true), 250 + features.length * 90 + 200);
     return () => {
@@ -174,7 +186,7 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
           </svg>
         </button>
         <h2 className="font-[family-name:var(--font-cinzel)] text-sm tracking-[0.3em] uppercase text-gold">
-          Face Reading
+          {t("face.modal.title")}
         </h2>
         <span className="w-9 h-9" aria-hidden />
       </header>
@@ -285,7 +297,7 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
                       } as CSSProperties
                     }
                   >
-                    {f.en}
+                    {t(`face.feature.${f.key}.label`)}
                   </text>
                 );
               })}
@@ -300,7 +312,7 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
                 <div className="mx-auto mb-4 w-12 h-12 rounded-full border-2 border-gold/30 border-t-gold animate-spin" />
               )}
               <p className="font-[family-name:var(--font-cinzel)] text-sm tracking-[0.25em] uppercase text-gold">
-                {STATUS_MESSAGES[status]}
+                {t(`face.modal.status.${status}`)}
               </p>
             </div>
           </div>
@@ -309,28 +321,32 @@ export function FaceAnalysisModal({ imageSrc, onClose }: Props) {
 
       {status === "ready" && (
         <div
-          className={`border-t border-gold/30 bg-ink-dark/60 max-h-[40vh] overflow-y-auto transition-all duration-700 ease-out ${
+          className={`border-t border-gold/30 bg-ink-dark/60 h-[40vh] overflow-y-auto transition-all duration-700 ease-out ${
             readingsReady ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
           }`}
         >
-          <div className="max-w-md mx-auto px-4 py-4 space-y-3">
-            <p className="font-[family-name:var(--font-cinzel)] text-[10px] tracking-[0.4em] uppercase text-gold/80 text-left">
-              The Canon of Ma Yi Shen Xiang
-            </p>
-            {features.map((f) => (
-              <div
-                key={`r-${f.key}`}
-                className="p-3 rounded-lg border border-gold/20 bg-parchment/5 text-left"
-              >
-                <p className="text-gold font-[family-name:var(--font-cinzel)] text-[11px] tracking-[0.2em] uppercase mb-1.5">
-                  {f.en}
-                </p>
-                <p className="text-parchment/90 text-[13px] leading-relaxed font-[family-name:var(--font-playfair)] text-left">
-                  {f.reading}
-                </p>
-              </div>
-            ))}
-          </div>
+          {unlocked ? (
+            <div className="max-w-md mx-auto px-4 py-4 space-y-3">
+              <p className="font-[family-name:var(--font-cinzel)] text-[10px] tracking-[0.4em] uppercase text-gold/80 text-left">
+                {t("face.modal.canon")}
+              </p>
+              {features.map((f) => (
+                <div
+                  key={`r-${f.key}`}
+                  className="p-3 rounded-lg border border-gold/20 bg-parchment/5 text-left"
+                >
+                  <p className="text-gold font-[family-name:var(--font-cinzel)] text-[11px] tracking-[0.2em] uppercase mb-1.5">
+                    {t(`face.feature.${f.key}.label`)}
+                  </p>
+                  <p className="text-parchment/90 text-[13px] leading-relaxed font-[family-name:var(--font-playfair)] text-left">
+                    {t(`face.feature.${f.key}.reading`)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmailGate onUnlock={() => setUnlocked(true)} />
+          )}
         </div>
       )}
     </div>

@@ -3,24 +3,25 @@
 import { useState } from "react";
 import Image from "next/image";
 import { PalmAnalysisModal } from "./PalmAnalysisModal";
+import { useT } from "@/lib/i18n";
 
-type Requirement = { label: string; path: string };
+type Requirement = { key: string; path: string };
 
 const requirements: Requirement[] = [
   {
-    label: "Open Palm",
+    key: "palm.req.open",
     path: "M7.5 11.25v-3.75a1.5 1.5 0 113 0v3.75m0 0V4.5a1.5 1.5 0 113 0v6.75m0 0V6a1.5 1.5 0 113 0v6m0 0v3a6 6 0 11-12 0v-3a1.5 1.5 0 113 0",
   },
   {
-    label: "Good Lighting",
+    key: "palm.req.lighting",
     path: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z",
   },
   {
-    label: "Palm Centered",
+    key: "palm.req.centered",
     path: "M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z",
   },
   {
-    label: "Sharp Focus",
+    key: "palm.req.sharp",
     path: "M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z",
   },
 ];
@@ -28,6 +29,7 @@ const requirements: Requirement[] = [
 const INPUT_ID = "palm-photo-upload";
 
 export function PalmUploadCard() {
+  const t = useT();
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -85,10 +87,10 @@ export function PalmUploadCard() {
       </label>
 
       <h2 className="font-[family-name:var(--font-cinzel)] text-xl tracking-[0.2em] uppercase text-cinnabar">
-        {preview ? "Photo Selected" : "Tap to Upload"}
+        {preview ? t("common.photo_selected") : t("common.tap_to_upload")}
       </h2>
       <p className="mt-1 text-[11px] tracking-[0.2em] uppercase text-ink-light">
-        {preview ? "Tap photo to change" : "An open palm, fingers spread"}
+        {preview ? t("common.tap_to_change") : t("palm.upload.subtitle")}
       </p>
 
       {preview ? (
@@ -103,7 +105,7 @@ export function PalmUploadCard() {
             textShadow: "0 1px 2px rgba(0,0,0,0.35)",
           }}
         >
-          Begin Your Reading
+          {t("common.begin_reading")}
         </button>
       ) : (
         <label
@@ -124,7 +126,7 @@ export function PalmUploadCard() {
               strokeLinejoin="round"
             />
           </svg>
-          Upload Photo
+          {t("common.upload_photo")}
         </label>
       )}
 
@@ -134,7 +136,7 @@ export function PalmUploadCard() {
 
       <div className="mt-6 pt-5 border-t border-gold/30 grid grid-cols-4 gap-2">
         {requirements.map((r) => (
-          <div key={r.label} className="flex flex-col items-center">
+          <div key={r.key} className="flex flex-col items-center">
             <div className="w-9 h-9 rounded-full border border-gold flex items-center justify-center text-ink-light mb-1.5">
               <svg
                 aria-hidden
@@ -148,7 +150,7 @@ export function PalmUploadCard() {
               </svg>
             </div>
             <span className="text-[9px] tracking-[0.1em] uppercase text-ink-light leading-tight text-center">
-              {r.label}
+              {t(r.key)}
             </span>
           </div>
         ))}

@@ -3,24 +3,25 @@
 import { useState } from "react";
 import Image from "next/image";
 import { FaceAnalysisModal } from "./FaceAnalysisModal";
+import { useT } from "@/lib/i18n";
 
-type Requirement = { label: string; path: string };
+type Requirement = { key: string; path: string };
 
 const requirements: Requirement[] = [
   {
-    label: "Good Lighting",
+    key: "face.req.lighting",
     path: "M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z",
   },
   {
-    label: "No Filters",
+    key: "face.req.no_filters",
     path: "M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm5.25 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75z",
   },
   {
-    label: "Face Centered",
+    key: "face.req.centered",
     path: "M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z",
   },
   {
-    label: "No Obstruction",
+    key: "face.req.no_obstruction",
     path: "M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88",
   },
 ];
@@ -28,6 +29,7 @@ const requirements: Requirement[] = [
 const INPUT_ID = "photo-upload";
 
 export function UploadCard() {
+  const t = useT();
   const [preview, setPreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
 
@@ -84,10 +86,10 @@ export function UploadCard() {
       </label>
 
       <h2 className="font-[family-name:var(--font-cinzel)] text-xl tracking-[0.2em] uppercase text-cinnabar">
-        {preview ? "Photo Selected" : "Tap to Upload"}
+        {preview ? t("common.photo_selected") : t("common.tap_to_upload")}
       </h2>
       <p className="mt-1 text-[11px] tracking-[0.2em] uppercase text-ink-light">
-        {preview ? "Tap photo to change" : "A clear front-facing photo"}
+        {preview ? t("common.tap_to_change") : t("face.upload.subtitle")}
       </p>
 
       {preview ? (
@@ -102,7 +104,7 @@ export function UploadCard() {
             textShadow: "0 1px 2px rgba(0,0,0,0.35)",
           }}
         >
-          Begin Your Reading
+          {t("common.begin_reading")}
         </button>
       ) : (
         <label
@@ -123,7 +125,7 @@ export function UploadCard() {
               strokeLinejoin="round"
             />
           </svg>
-          Upload Photo
+          {t("common.upload_photo")}
         </label>
       )}
 
@@ -133,7 +135,7 @@ export function UploadCard() {
 
       <div className="mt-6 pt-5 border-t border-gold/30 grid grid-cols-4 gap-2">
         {requirements.map((r) => (
-          <div key={r.label} className="flex flex-col items-center">
+          <div key={r.key} className="flex flex-col items-center">
             <div className="w-9 h-9 rounded-full border border-gold flex items-center justify-center text-ink-light mb-1.5">
               <svg
                 aria-hidden
@@ -147,7 +149,7 @@ export function UploadCard() {
               </svg>
             </div>
             <span className="text-[9px] tracking-[0.1em] uppercase text-ink-light leading-tight text-center">
-              {r.label}
+              {t(r.key)}
             </span>
           </div>
         ))}

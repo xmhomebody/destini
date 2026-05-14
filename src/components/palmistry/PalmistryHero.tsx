@@ -1,11 +1,13 @@
-/**
- * 手相页首屏标题：与 Face Reading 同样的金色光晕（静态，无呼吸动画）
- */
+"use client";
+
+import { useT } from "@/lib/i18n";
+
 export function PalmistryHero() {
+  const t = useT();
   return (
     <header className="text-center mt-6 mb-6 px-4">
       <h1 className="font-[family-name:var(--font-cinzel)] text-2xl sm:text-3xl tracking-[0.16em] uppercase text-cinnabar leading-[1.15] glow-static whitespace-nowrap">
-        Palm Reading
+        {t("palm.title")}
       </h1>
 
       <div className="flex justify-center items-center mt-4 opacity-70" aria-hidden>

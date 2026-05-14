@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Hero } from "@/components/home/Hero";
 import { Services } from "@/components/home/Services";
 import { HomeFooter } from "@/components/home/HomeFooter";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 export default function Home() {
   const jsonLd = {
@@ -66,6 +67,9 @@ export default function Home() {
 
       {/* 内容层：z-10 浮于背景图之上，居中收窄 */}
       <div className="relative z-10 min-h-screen w-full max-w-md mx-auto flex flex-col">
+        <div className="flex justify-end px-4 pt-3">
+          <LanguageSwitcher />
+        </div>
         <Hero />
         <Services />
         <HomeFooter />
