@@ -13,17 +13,34 @@ export function EmailGate({ onUnlock }: Props) {
   const t = useT();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = email.trim();
     if (!isValidEmail(trimmed)) {
       setError(t("email.invalid"));
       return;
     }
-    setStoredEmail(trimmed);
     setError(null);
-    onUnlock();
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      if (!res.ok) {
+        setError(t("email.invalid"));
+        return;
+      }
+      setStoredEmail(trimmed);
+      onUnlock();
+    } catch {
+      setError(t("email.invalid"));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -55,7 +72,8 @@ export function EmailGate({ onUnlock }: Props) {
         )}
         <button
           type="submit"
-          className="w-full py-3 rounded-full font-[family-name:var(--font-cinzel)] text-sm tracking-[0.25em] uppercase text-white transition-all active:scale-[0.97]"
+          disabled={submitting}
+          className="w-full py-3 rounded-full font-[family-name:var(--font-cinzel)] text-sm tracking-[0.25em] uppercase text-white transition-all active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
           style={{
             background: "linear-gradient(180deg, #c23a26 0%, #8a1e10 100%)",
             boxShadow:
