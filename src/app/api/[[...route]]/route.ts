@@ -1,6 +1,13 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  generateFaceReport,
+  parseDataUrl,
+  type ReportLang,
+} from "@/lib/faceReport";
+
+export const maxDuration = 60;
 
 export const runtime = "nodejs";
 
@@ -64,6 +71,44 @@ app.post("/email", async (c) => {
   }
 
   return c.json({ ok: true, id: data.id });
+});
+
+app.post("/face-report", async (c) => {
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const image = (body as { image?: unknown } | null)?.image;
+  if (typeof image !== "string" || !image.startsWith("data:image/")) {
+    return c.json({ error: "A base64 image data URL is required" }, 400);
+  }
+
+  const parsed = parseDataUrl(image);
+  if (!parsed) {
+    return c.json({ error: "Could not parse image data URL" }, 400);
+  }
+
+  const rawLang = (body as { lang?: unknown } | null)?.lang;
+  const lang: ReportLang =
+    rawLang === "fr" || rawLang === "de" || rawLang === "it" ? rawLang : "en";
+  const withScores =
+    (body as { withScores?: unknown } | null)?.withScores !== false;
+
+  try {
+    const result = await generateFaceReport(
+      parsed.base64,
+      parsed.mimeType,
+      lang,
+      withScores,
+    );
+    return c.json({ ok: true, lang, ...result });
+  } catch (err) {
+    console.error("[/api/face-report] generation failed", err);
+    return c.json({ error: "Analysis failed. Please try again." }, 502);
+  }
 });
 
 export const GET = handle(app);
